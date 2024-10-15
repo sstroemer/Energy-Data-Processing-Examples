@@ -1,19 +1,3 @@
-# Using the environment of PyPSA-Eur, then adding atlite, to make sure all dependencies are at some working version.
-# `conda env create -f environment.yaml -n atlite-working -y`
-# `conda activate atlite-working`
-# `pip install nuts-finder --no-dependencies`
-#
-# See:
-# https://atlite.readthedocs.io/en/master/examples/landuse-availability.html
-# for more information, and working with weather cutouts too.
-#
-# Also compare:
-# https://github.com/PyPSA/pypsa-eur/blob/be83b59302f2d2e90b657d1b39377ddf3b63e1c6/scripts/determine_availability_matrix.py
-#
-# Requires:
-# - CORINE land use data
-# - Natura 2000 data
-
 import atlite
 import matplotlib.pyplot as plt
 import geopandas as gpd
