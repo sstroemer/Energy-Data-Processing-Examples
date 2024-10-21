@@ -36,6 +36,9 @@ gdf_nuts = gpd.GeoDataFrame.from_features(nf_shapes, crs=nf_shapes["crs"]["prope
 gdf_nuts = gdf_nuts.set_index("NUTS_ID")
 gdf_at_nuts3 = gdf_nuts.loc[(gdf_nuts.CNTR_CODE == "AT") & (gdf_nuts.LEVL_CODE == 3)].copy()
 
+# Calculate the area of each NUTS3 region.
+gdf_at_nuts3["area_sqkm"] = gdf_at_nuts3.geometry.to_crs(excluder.crs).area / 1e6
+
 # Calculate capacity for each technology and area.
 for tech, attr in config.items():
     excluder = atlite.gis.ExclusionContainer()
@@ -52,14 +55,14 @@ for tech, attr in config.items():
     excluder.plot_shape_availability(gdf_at_nuts3.geometry)
     plt.savefig(f"{tech}.png")
 
-    # Calculate the area of each NUTS3 region and the area of eligible land.
+    # Calculate the area of eligible land.
     gdf_at_nuts3["area_sqkm"] = gdf_at_nuts3.geometry.to_crs(excluder.crs).area / 1e6
-    gdf_at_nuts3["area_eligible_sqkm"] = 0.0
+    gdf_at_nuts3[f"{tech}_area_eligible_sqkm"] = 0.0
     for nuts_id in gdf_at_nuts3.index:
         masked, transform = excluder.compute_shape_availability(gdf_at_nuts3.loc[[nuts_id]].geometry)
-        gdf_at_nuts3.loc[nuts_id, "area_eligible_sqkm"] = masked.sum() * excluder.res**2 / 1e6
+        gdf_at_nuts3.loc[nuts_id, f"{tech}_area_eligible_sqkm"] = masked.sum() * excluder.res**2 / 1e6
 
     # Calculate the technologies capacity for each NUTS3 region.
-    gdf_at_nuts3[f"{tech}_capacity_mw"] = gdf_at_nuts3["area_eligible_sqkm"] * attr["capacity_per_sqkm"]
+    gdf_at_nuts3[f"{tech}_capacity_mw"] = gdf_at_nuts3[f"{tech}_area_eligible_sqkm"] * attr["capacity_per_sqkm"]
 
 gdf_at_nuts3.to_excel("nuts_stats.xlsx")
